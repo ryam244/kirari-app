@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --pink: #FFB5C8;
+  --purple: #C8B5FF;
+  --pink-dark: #FF85A8;
+  --purple-dark: #A885FF;
+  --bg-gradient: linear-gradient(135deg, #FFE4EF 0%, #EEE4FF 50%, #E4EDFF 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  color: #3D2B4E;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #FFB5C8;
+  border-radius: 10px;
+}
+
+/* Mobile frame container */
+.mobile-container {
+  max-width: 390px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Glass card effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 24px;
+}
+
+/* Gradient button */
+.btn-primary {
+  background: linear-gradient(135deg, #FFB5C8, #C8B5FF);
+  color: white;
+  font-weight: 600;
+  border-radius: 50px;
+  padding: 14px 28px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(255, 181, 200, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(255, 181, 200, 0.5);
+}
+
+.btn-secondary {
+  background: white;
+  color: #C8B5FF;
+  font-weight: 600;
+  border-radius: 50px;
+  padding: 14px 28px;
+  border: 2px solid #C8B5FF;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Input styles */
+.cute-input {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid #FFE4EF;
+  border-radius: 20px;
+  padding: 16px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #3D2B4E;
+  width: 100%;
+  transition: border-color 0.3s;
+  outline: none;
+}
+
+.cute-input:focus {
+  border-color: #FFB5C8;
+  box-shadow: 0 0 0 4px rgba(255, 181, 200, 0.15);
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 390px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 181, 200, 0.3);
+  padding: 12px 0 24px;
+  z-index: 100;
+}
+
+@media (max-width: 390px) {
+  .bottom-nav {
+    width: 100%;
+  }
+}
