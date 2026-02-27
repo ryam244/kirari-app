@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/hooks/useSettings";
@@ -19,7 +19,14 @@ const slideVariants = {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { update } = useSettings();
+  const { settings, update, isLoaded } = useSettings();
+
+  // Already onboarded → go home
+  useEffect(() => {
+    if (isLoaded && settings.isOnboarded) {
+      router.replace("/");
+    }
+  }, [isLoaded, settings.isOnboarded, router]);
 
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);

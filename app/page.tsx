@@ -274,7 +274,9 @@ export default function HomePage() {
           </div>
           <p className="text-xs text-gray-400 mt-1">
             {diffStr !== null ? "昨日比 | " : ""}
-            目標まで あと {toGoal} kg ✨
+            {Number(toGoal) === 0
+              ? "🎉 目標体重達成！おめでとう！"
+              : `目標まで あと ${toGoal} kg ✨`}
           </p>
 
           {/* Progress bar */}
@@ -377,8 +379,8 @@ export default function HomePage() {
               value:
                 monthlyChange !== null
                   ? (Number(monthlyChange) > 0 ? "+" : "") + monthlyChange
-                  : "−",
-              unit: monthlyChange !== null ? "kg" : "",
+                  : "--",
+              unit: monthlyChange !== null ? "kg" : "記録少",
               emoji: "📉",
             },
             {

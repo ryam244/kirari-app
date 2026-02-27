@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
@@ -30,6 +30,8 @@ export default function LogPage() {
   const [aiComment, setAiComment] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [weightError, setWeightError] = useState("");
+  // Capture before submission to correctly show "記録完了" vs "更新完了"
+  const wasUpdateRef = useRef(false);
 
   // Pre-fill weight from last log or settings
   useEffect(() => {
@@ -71,6 +73,7 @@ export default function LogPage() {
 
   const handleSubmit = async () => {
     if (!validate()) return;
+    wasUpdateRef.current = !!todayLog;
     setIsLoading(true);
 
     // Small artificial delay for UX (feels like AI is thinking)
@@ -102,6 +105,28 @@ export default function LogPage() {
 
   const currentMood = MOODS.find((m) => m.key === selectedMood);
 
+  // Don't show stale "52.0" — wait for localStorage to load
+  if (!isLoaded) {
+    return (
+      <div className="mobile-container pb-28">
+        <div className="px-5 pt-12 pb-4">
+          <h1 className="text-2xl font-bold text-gray-700">📝 今日の記録</h1>
+          <p className="text-sm text-gray-400 mt-1">{dateStr}</p>
+        </div>
+        <div className="flex items-center justify-center h-64">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 1.2 }}
+            className="text-5xl"
+          >
+            ✨
+          </motion.div>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
   if (submitted && aiComment) {
     return (
       <div className="mobile-container pb-28">
@@ -121,7 +146,7 @@ export default function LogPage() {
               🌸
             </motion.div>
             <h2 className="text-2xl font-bold text-gray-700 mb-1">
-              {todayLog ? "更新完了！" : "記録完了！"}
+              {wasUpdateRef.current ? "更新完了！" : "記録完了！"}
             </h2>
             <p className="text-gray-400 text-sm">今日も頑張りました✨</p>
           </motion.div>
