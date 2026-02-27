@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -43,6 +42,13 @@ body {
   margin: 0 auto;
   min-height: 100vh;
   position: relative;
+}
+
+/* Page header top padding that includes notch/Dynamic Island offset.
+   Replace pt-12 in page headers with this class.
+   env(safe-area-inset-top) = 0 on no-notch, ~47px on notch, ~59px on Dynamic Island */
+.page-top {
+  padding-top: max(48px, calc(env(safe-area-inset-top, 0px) + 16px));
 }
 
 /* Glass card effect */
@@ -103,7 +109,7 @@ body {
   box-shadow: 0 0 0 4px rgba(255, 181, 200, 0.15);
 }
 
-/* Bottom navigation */
+/* Bottom navigation — respects Home Indicator */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -113,7 +119,7 @@ body {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255, 181, 200, 0.3);
-  padding: 12px 0 24px;
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
   z-index: 100;
 }
 

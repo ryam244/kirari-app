@@ -76,7 +76,7 @@ export default function PremiumPage() {
     <div className="mobile-container pb-28 overflow-hidden">
       {/* Hero section */}
       <div
-        className="relative px-5 pt-14 pb-8 text-center overflow-hidden"
+        className="relative px-5 page-top pb-8 text-center overflow-hidden"
         style={{
           background: "linear-gradient(160deg, #FFB5C8 0%, #C8B5FF 50%, #B5D8FF 100%)",
         }}

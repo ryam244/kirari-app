@@ -231,7 +231,7 @@ export default function DiaryPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="px-5 pt-12 pb-2"
+        className="px-5 page-top pb-2"
       >
         <h1 className="text-2xl font-bold text-gray-700">📖 AI日記</h1>
         <p className="text-sm text-gray-400 mt-1">

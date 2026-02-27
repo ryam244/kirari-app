@@ -109,7 +109,7 @@ export default function LogPage() {
   if (!isLoaded) {
     return (
       <div className="mobile-container pb-28">
-        <div className="px-5 pt-12 pb-4">
+        <div className="px-5 page-top pb-4">
           <h1 className="text-2xl font-bold text-gray-700">📝 今日の記録</h1>
           <p className="text-sm text-gray-400 mt-1">{dateStr}</p>
         </div>
@@ -130,7 +130,7 @@ export default function LogPage() {
   if (submitted && aiComment) {
     return (
       <div className="mobile-container pb-28">
-        <div className="px-5 pt-12 pb-4">
+        <div className="px-5 page-top pb-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -238,7 +238,7 @@ export default function LogPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="px-5 pt-12 pb-4"
+        className="px-5 page-top pb-4"
       >
         <h1 className="text-2xl font-bold text-gray-700">
           {todayLog ? "✏️ 記録を更新" : "📝 今日の記録"}

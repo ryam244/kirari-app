@@ -138,7 +138,7 @@ export default function HomePage() {
   if (logs.length === 0) {
     return (
       <div className="mobile-container pb-28">
-        <div className="px-5 pt-12 pb-4">
+        <div className="px-5 page-top pb-4">
           <p className="text-sm text-gray-400 font-medium">{dateStr}</p>
           <h1 className="text-2xl font-bold text-gray-700 mt-1">
             おかえり、{settings.name}！<span className="ml-1">🌸</span>
@@ -218,7 +218,7 @@ export default function HomePage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="px-5 pt-12 pb-4"
+        className="px-5 page-top pb-4"
       >
         <div className="flex justify-between items-center">
           <div>

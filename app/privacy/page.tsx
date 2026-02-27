@@ -11,7 +11,7 @@ export default function PrivacyPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="px-5 pt-12 pb-4"
+        className="px-5 page-top pb-4"
       >
         <button
           onClick={() => router.back()}

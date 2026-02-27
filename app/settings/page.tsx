@@ -86,7 +86,7 @@ export default function SettingsPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="px-5 pt-12 pb-4"
+        className="px-5 page-top pb-4"
       >
         <h1 className="text-2xl font-bold text-gray-700">⚙️ 設定</h1>
         <p className="text-sm text-gray-400 mt-1">プロフィールと目標を管理</p>
