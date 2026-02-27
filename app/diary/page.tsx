@@ -226,16 +226,16 @@ export default function DiaryPage() {
   }
 
   return (
-    <div className="mobile-container pb-28">
+    <div className="mobile-container">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="px-5 page-top pb-2"
       >
-        <h1 className="text-2xl font-bold text-gray-700">📖 AI日記</h1>
+        <h1 className="text-2xl font-bold text-gray-700">AI日記</h1>
         <p className="text-sm text-gray-400 mt-1">
-          キラリが毎日を応援します💕
+          キラリが毎日を応援します
         </p>
       </motion.div>
 
@@ -320,6 +320,7 @@ export default function DiaryPage() {
         )}
       </div>
 
+      <div className="nav-spacer" />
       <BottomNav />
     </div>
   );

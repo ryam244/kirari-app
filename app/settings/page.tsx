@@ -81,14 +81,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mobile-container pb-28">
+    <div className="mobile-container pb-0">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="px-5 page-top pb-4"
       >
-        <h1 className="text-2xl font-bold text-gray-700">⚙️ 設定</h1>
+        <h1 className="text-2xl font-bold text-gray-700">設定</h1>
         <p className="text-sm text-gray-400 mt-1">プロフィールと目標を管理</p>
       </motion.div>
 
@@ -372,6 +372,7 @@ export default function SettingsPage() {
         </motion.div>
       </div>
 
+      <div className="nav-spacer" />
       <BottomNav />
     </div>
   );

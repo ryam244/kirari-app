@@ -19,7 +19,7 @@ export default function TermsPage() {
         >
           ← 戻る
         </button>
-        <h1 className="text-2xl font-bold text-gray-700">📄 利用規約</h1>
+        <h1 className="text-2xl font-bold text-gray-700">利用規約</h1>
         <p className="text-xs text-gray-400 mt-1">最終更新：2026年2月</p>
       </motion.div>
 
@@ -33,6 +33,7 @@ export default function TermsPage() {
           <h2 className="font-bold text-gray-700 text-base">1. サービスの目的</h2>
           <p>
             キラリ（以下「本アプリ」）は、体重管理とウェルネスをサポートすることを目的としています。
+            AIペット育成機能を通じて、毎日の記録習慣を楽しく継続することを支援します。
             本アプリのご利用をもって、本規約に同意いただいたものとみなします。
           </p>
         </section>
@@ -47,6 +48,9 @@ export default function TermsPage() {
             本アプリのAIコメントは励ましを目的としたものであり、
             医学的根拠に基づいたアドバイスではありません。
           </p>
+          <p>
+            AIペットの育成状態は娯楽目的であり、健康状態の評価を意図するものではありません。
+          </p>
         </section>
 
         <section className="glass-card p-5 shadow-sm space-y-3">
@@ -55,20 +59,32 @@ export default function TermsPage() {
             <li>本アプリの無断複製・改変・再配布</li>
             <li>本アプリを通じた違法行為</li>
             <li>他のユーザーへの迷惑行為</li>
+            <li>本アプリのリバースエンジニアリング</li>
           </ul>
         </section>
 
         <section className="glass-card p-5 shadow-sm space-y-3">
           <h2 className="font-bold text-gray-700 text-base">4. データについて</h2>
           <p>
-            本アプリに記録したデータはお客様自身のものです。
+            本アプリに記録したデータ（体重記録、AIペットの育成データ、実績等）はお客様自身のものです。
+            すべてのデータはお客様のデバイス内にのみ保存されます。
+          </p>
+          <p>
             アンインストールやデータリセット時にデータが消失することをご了承ください。
             重要なデータは定期的にメモ等で控えることをお勧めします。
           </p>
         </section>
 
         <section className="glass-card p-5 shadow-sm space-y-3">
-          <h2 className="font-bold text-gray-700 text-base">5. 規約の変更</h2>
+          <h2 className="font-bold text-gray-700 text-base">5. 知的財産権</h2>
+          <p>
+            本アプリに含まれるデザイン、キャラクター（AIペットを含む）、テキスト、
+            アイコン等のコンテンツは、本アプリの運営者に帰属します。
+          </p>
+        </section>
+
+        <section className="glass-card p-5 shadow-sm space-y-3">
+          <h2 className="font-bold text-gray-700 text-base">6. 規約の変更</h2>
           <p>
             本規約は必要に応じて変更されることがあります。
             重要な変更がある場合はアプリ内でお知らせします。
@@ -76,14 +92,14 @@ export default function TermsPage() {
         </section>
 
         <section className="glass-card p-5 shadow-sm space-y-3">
-          <h2 className="font-bold text-gray-700 text-base">6. お問い合わせ</h2>
+          <h2 className="font-bold text-gray-700 text-base">7. お問い合わせ</h2>
           <p>
             本規約に関するご質問は、アプリ内のお問い合わせフォームよりご連絡ください。
           </p>
         </section>
 
         <p className="text-xs text-gray-400 text-center pb-4">
-          © 2026 キラリ. All rights reserved.
+          &copy; 2026 キラリ. All rights reserved.
         </p>
       </motion.div>
     </div>
