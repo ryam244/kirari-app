@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Transition } from "framer-motion";
 import BottomNav from "@/components/BottomNav";
 import { WeightLog } from "@/lib/data";
 import { useWeightLogs } from "@/hooks/useWeightLogs";
@@ -12,7 +12,7 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.06, duration: 0.4, ease: "easeOut" as const },
+    transition: { delay: i * 0.06, duration: 0.4, ease: "easeOut" } as Transition,
   }),
 };
 
