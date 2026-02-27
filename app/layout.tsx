@@ -1,11 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kirari（キラリ）✨ - 体重ログ × AI日記",
+  title: "キラリ ✨ - 体重ログ × AI日記",
   description: "かわいいUIで毎日の健康習慣を楽しく記録。AIが優しく励ます体重管理アプリ。",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
   themeColor: "#FFB5C8",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

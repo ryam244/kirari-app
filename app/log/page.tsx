@@ -1,64 +1,136 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
-import { MOODS } from "@/lib/data";
+import { MOODS, WeightLog } from "@/lib/data";
+import { useWeightLogs, todayStr } from "@/hooks/useWeightLogs";
+import { useSettings } from "@/hooks/useSettings";
+import { generateAIComment } from "@/lib/aiComments";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.45, ease: "easeOut" },
+    transition: { delay: i * 0.08, duration: 0.45, ease: "easeOut" as const },
   }),
 };
 
 export default function LogPage() {
   const router = useRouter();
-  const [weight, setWeight] = useState("52.3");
-  const [selectedMood, setSelectedMood] = useState("great");
+  const { logs, todayLog, addLog, isLoaded } = useWeightLogs();
+  const { settings } = useSettings();
+
+  const [weight, setWeight] = useState("52.0");
+  const [selectedMood, setSelectedMood] = useState("good");
   const [memo, setMemo] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [aiComment, setAiComment] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [weightError, setWeightError] = useState("");
+  // Capture before submission to correctly show "記録完了" vs "更新完了"
+  const wasUpdateRef = useRef(false);
+
+  // Pre-fill weight from last log or settings
+  useEffect(() => {
+    if (isLoaded) {
+      const last =
+        todayLog?.weight ?? logs[0]?.weight ?? settings.startWeight ?? 55;
+      setWeight(last.toFixed(1));
+      if (todayLog) {
+        setSelectedMood(todayLog.mood);
+        setMemo(todayLog.memo);
+      }
+    }
+  }, [isLoaded, todayLog, logs, settings.startWeight]);
 
   const handleWeightChange = (delta: number) => {
     const current = parseFloat(weight) || 50;
-    setWeight((current + delta).toFixed(1));
+    const next = Math.min(200, Math.max(30, current + delta));
+    setWeight(next.toFixed(1));
+    setWeightError("");
+  };
+
+  const handleWeightInput = (val: string) => {
+    setWeight(val);
+    setWeightError("");
+  };
+
+  const validate = (): boolean => {
+    const w = parseFloat(weight);
+    if (isNaN(w)) {
+      setWeightError("正しい数値を入力してください");
+      return false;
+    }
+    if (w < 30 || w > 200) {
+      setWeightError("30〜200 kg の範囲で入力してください");
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async () => {
-    if (!weight) return;
+    if (!validate()) return;
+    wasUpdateRef.current = !!todayLog;
     setIsLoading(true);
 
-    try {
-      const res = await fetch("/api/ai-comment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          weight,
-          mood: MOODS.find((m) => m.key === selectedMood)?.label,
-          memo,
-        }),
-      });
-      const data = await res.json();
-      setAiComment(data.comment);
-    } catch {
-      setAiComment("今日も記録できたこと、素晴らしいです！🌸 この習慣が未来のあなたを作ります💕");
-    }
+    // Small artificial delay for UX (feels like AI is thinking)
+    await new Promise((r) => setTimeout(r, 800));
 
+    const comment = generateAIComment(selectedMood);
+    setAiComment(comment);
+
+    const mood = MOODS.find((m) => m.key === selectedMood);
+    const newLog: WeightLog = {
+      id: todayLog?.id ?? Date.now().toString(),
+      date: todayStr(),
+      weight: parseFloat(parseFloat(weight).toFixed(1)),
+      mood: selectedMood,
+      moodEmoji: mood?.emoji ?? "😊",
+      memo,
+      aiComment: comment,
+    };
+
+    addLog(newLog);
     setIsLoading(false);
     setSubmitted(true);
   };
 
+  // Dynamic date
+  const now = new Date();
+  const dayNames = ["日", "月", "火", "水", "木", "金", "土"];
+  const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ${dayNames[now.getDay()]}曜日`;
+
   const currentMood = MOODS.find((m) => m.key === selectedMood);
+
+  // Don't show stale "52.0" — wait for localStorage to load
+  if (!isLoaded) {
+    return (
+      <div className="mobile-container pb-28">
+        <div className="px-5 page-top pb-4">
+          <h1 className="text-2xl font-bold text-gray-700">📝 今日の記録</h1>
+          <p className="text-sm text-gray-400 mt-1">{dateStr}</p>
+        </div>
+        <div className="flex items-center justify-center h-64">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 1.2 }}
+            className="text-5xl"
+          >
+            ✨
+          </motion.div>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
 
   if (submitted && aiComment) {
     return (
       <div className="mobile-container pb-28">
-        <div className="px-5 pt-12 pb-4">
+        <div className="px-5 page-top pb-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -73,7 +145,9 @@ export default function LogPage() {
             >
               🌸
             </motion.div>
-            <h2 className="text-2xl font-bold text-gray-700 mb-1">記録完了！</h2>
+            <h2 className="text-2xl font-bold text-gray-700 mb-1">
+              {wasUpdateRef.current ? "更新完了！" : "記録完了！"}
+            </h2>
             <p className="text-gray-400 text-sm">今日も頑張りました✨</p>
           </motion.div>
         </div>
@@ -86,12 +160,15 @@ export default function LogPage() {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="glass-card p-5 shadow-lg"
           >
-            <h3 className="text-sm font-semibold text-gray-500 mb-3">今日の記録</h3>
+            <h3 className="text-sm font-semibold text-gray-500 mb-3">
+              今日の記録
+            </h3>
             <div className="flex items-center gap-4">
               <span className="text-4xl">{currentMood?.emoji}</span>
               <div>
                 <div className="font-inter text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-500">
-                  {weight} <span className="text-gray-400 text-lg font-normal">kg</span>
+                  {weight}{" "}
+                  <span className="text-gray-400 text-lg font-normal">kg</span>
                 </div>
                 <p className="text-sm text-gray-400">{currentMood?.label}</p>
               </div>
@@ -110,7 +187,8 @@ export default function LogPage() {
             transition={{ delay: 0.5, duration: 0.5 }}
             className="glass-card p-5 shadow-lg"
             style={{
-              background: "linear-gradient(135deg, rgba(255,181,200,0.25), rgba(200,181,255,0.25))",
+              background:
+                "linear-gradient(135deg, rgba(255,181,200,0.25), rgba(200,181,255,0.25))",
             }}
           >
             <div className="flex gap-3 items-start">
@@ -118,8 +196,12 @@ export default function LogPage() {
                 ✨
               </div>
               <div>
-                <p className="text-xs font-semibold text-purple-400 mb-2">キラリからのメッセージ💕</p>
-                <p className="text-sm text-gray-600 leading-relaxed">{aiComment}</p>
+                <p className="text-xs font-semibold text-purple-400 mb-2">
+                  キラリからのメッセージ💕
+                </p>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {aiComment}
+                </p>
               </div>
             </div>
           </motion.div>
@@ -134,17 +216,13 @@ export default function LogPage() {
               onClick={() => {
                 setSubmitted(false);
                 setAiComment(null);
-                setMemo("");
               }}
               className="btn-secondary py-3"
             >
-              もう一度記録
+              修正する
             </button>
-            <button
-              onClick={() => router.push("/")}
-              className="btn-primary py-3"
-            >
-              ホームへ🏠
+            <button onClick={() => router.push("/")} className="btn-primary py-3">
+              ホームへ 🏠
             </button>
           </motion.div>
         </div>
@@ -160,12 +238,12 @@ export default function LogPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="px-5 pt-12 pb-4"
+        className="px-5 page-top pb-4"
       >
         <h1 className="text-2xl font-bold text-gray-700">
-          📝 今日の記録
+          {todayLog ? "✏️ 記録を更新" : "📝 今日の記録"}
         </h1>
-        <p className="text-sm text-gray-400 mt-1">2026年2月18日 水曜日</p>
+        <p className="text-sm text-gray-400 mt-1">{dateStr}</p>
       </motion.div>
 
       <div className="px-5 space-y-4">
@@ -177,7 +255,9 @@ export default function LogPage() {
           animate="visible"
           className="glass-card p-6 shadow-lg"
         >
-          <h3 className="text-sm font-semibold text-gray-500 mb-4">⚖️ 今日の体重</h3>
+          <h3 className="text-sm font-semibold text-gray-500 mb-4">
+            ⚖️ 今日の体重
+          </h3>
           <div className="flex items-center justify-center gap-4">
             <button
               onClick={() => handleWeightChange(-0.1)}
@@ -189,13 +269,18 @@ export default function LogPage() {
               <input
                 type="number"
                 value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                className="cute-input text-center text-4xl font-bold w-40"
+                onChange={(e) => handleWeightInput(e.target.value)}
+                className={`cute-input text-center text-4xl font-bold w-40 ${
+                  weightError ? "border-red-300 focus:ring-red-200" : ""
+                }`}
                 step="0.1"
                 min="30"
                 max="200"
               />
               <p className="text-gray-400 text-sm mt-1">kg</p>
+              {weightError && (
+                <p className="text-xs text-red-400 mt-1">{weightError}</p>
+              )}
             </div>
             <button
               onClick={() => handleWeightChange(0.1)}
@@ -214,7 +299,9 @@ export default function LogPage() {
           animate="visible"
           className="glass-card p-5 shadow-lg"
         >
-          <h3 className="text-sm font-semibold text-gray-500 mb-4">💭 今日の気分は？</h3>
+          <h3 className="text-sm font-semibold text-gray-500 mb-4">
+            💭 今日の気分は？
+          </h3>
           <div className="grid grid-cols-5 gap-2">
             {MOODS.map((mood) => (
               <button
@@ -227,9 +314,13 @@ export default function LogPage() {
                 }`}
               >
                 <span className="text-3xl">{mood.emoji}</span>
-                <span className={`text-xs font-medium ${
-                  selectedMood === mood.key ? "text-purple-400" : "text-gray-400"
-                }`}>
+                <span
+                  className={`text-xs font-medium ${
+                    selectedMood === mood.key
+                      ? "text-purple-400"
+                      : "text-gray-400"
+                  }`}
+                >
                   {mood.label}
                 </span>
               </button>
@@ -245,7 +336,9 @@ export default function LogPage() {
           animate="visible"
           className="glass-card p-5 shadow-lg"
         >
-          <h3 className="text-sm font-semibold text-gray-500 mb-3">💌 今日のひとこと（任意）</h3>
+          <h3 className="text-sm font-semibold text-gray-500 mb-3">
+            💌 今日のひとこと（任意）
+          </h3>
           <textarea
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
@@ -253,7 +346,11 @@ export default function LogPage() {
             className="cute-input resize-none text-sm font-normal"
             rows={3}
             style={{ fontFamily: "'Noto Sans JP', sans-serif", fontSize: "14px" }}
+            maxLength={200}
           />
+          <p className="text-xs text-gray-300 text-right mt-1">
+            {memo.length}/200
+          </p>
         </motion.div>
 
         {/* Quick memo chips */}
@@ -264,10 +361,18 @@ export default function LogPage() {
           animate="visible"
           className="flex gap-2 flex-wrap"
         >
-          {["🏃 運動した", "🥗 野菜多め", "💧 水分補給◎", "😴 よく眠れた", "🍕 食べすぎた"].map((chip) => (
+          {[
+            "🏃 運動した",
+            "🥗 野菜多め",
+            "💧 水分補給◎",
+            "😴 よく眠れた",
+            "🍕 食べすぎた",
+          ].map((chip) => (
             <button
               key={chip}
-              onClick={() => setMemo(memo ? `${memo} ${chip}` : chip)}
+              onClick={() =>
+                setMemo((prev) => (prev ? `${prev} ${chip}` : chip))
+              }
               className="px-3 py-1.5 bg-white rounded-full text-xs text-gray-500 border border-gray-100 shadow-sm active:scale-95 transition-transform"
             >
               {chip}
@@ -285,7 +390,7 @@ export default function LogPage() {
           <button
             onClick={handleSubmit}
             disabled={!weight || isLoading}
-            className="w-full btn-primary text-lg relative overflow-hidden"
+            className="w-full btn-primary text-lg relative overflow-hidden disabled:opacity-60"
           >
             <AnimatePresence mode="wait">
               {isLoading ? (
@@ -296,8 +401,14 @@ export default function LogPage() {
                   exit={{ opacity: 0 }}
                   className="flex items-center justify-center gap-2"
                 >
-                  <span className="inline-block animate-spin">✨</span>
-                  <span>AIコメント生成中...</span>
+                  <motion.span
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                    className="inline-block"
+                  >
+                    ✨
+                  </motion.span>
+                  <span>キラリが考え中...</span>
                 </motion.div>
               ) : (
                 <motion.span
@@ -306,14 +417,13 @@ export default function LogPage() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  記録して AIコメントをもらう 🌸
+                  記録してコメントをもらう 🌸
                 </motion.span>
               )}
             </AnimatePresence>
           </button>
         </motion.div>
 
-        {/* Info note */}
         <motion.p
           custom={5}
           variants={fadeUp}
@@ -321,7 +431,7 @@ export default function LogPage() {
           animate="visible"
           className="text-center text-xs text-gray-400 pb-2"
         >
-          💡 記録するとAIが優しくコメントしてくれます
+          💡 記録するとキラリが優しくコメントしてくれます
         </motion.p>
       </div>
 
