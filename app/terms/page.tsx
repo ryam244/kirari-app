@@ -94,7 +94,10 @@ export default function TermsPage() {
         <section className="glass-card p-5 shadow-sm space-y-3">
           <h2 className="font-bold text-gray-700 text-base">7. お問い合わせ</h2>
           <p>
-            本規約に関するご質問は、アプリ内のお問い合わせフォームよりご連絡ください。
+            本規約に関するご質問は、下記メールアドレスよりご連絡ください。
+          </p>
+          <p className="font-medium text-purple-500">
+            support@kirari-app.com
           </p>
         </section>
 

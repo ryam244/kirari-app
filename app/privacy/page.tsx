@@ -88,7 +88,10 @@ export default function PrivacyPage() {
         <section className="glass-card p-5 shadow-sm space-y-3">
           <h2 className="font-bold text-gray-700 text-base">6. お問い合わせ</h2>
           <p>
-            プライバシーに関するご質問は、アプリ内のお問い合わせフォームよりご連絡ください。
+            プライバシーに関するご質問は、下記メールアドレスよりご連絡ください。
+          </p>
+          <p className="font-medium text-purple-500">
+            support@kirari-app.com
           </p>
         </section>
 

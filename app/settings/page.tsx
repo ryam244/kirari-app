@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 import { useSettings } from "@/hooks/useSettings";
 import { clearAllData } from "@/lib/storage";
@@ -304,21 +305,21 @@ export default function SettingsPage() {
             </div>
             <div className="flex justify-between items-center">
               <span>プライバシーポリシー</span>
-              <a
+              <Link
                 href="/privacy"
                 className="text-purple-400 font-medium text-xs px-3 py-1.5 rounded-full border border-purple-200"
               >
                 確認する
-              </a>
+              </Link>
             </div>
             <div className="flex justify-between items-center">
               <span>利用規約</span>
-              <a
+              <Link
                 href="/terms"
                 className="text-purple-400 font-medium text-xs px-3 py-1.5 rounded-full border border-purple-200"
               >
                 確認する
-              </a>
+              </Link>
             </div>
           </div>
         </motion.div>
