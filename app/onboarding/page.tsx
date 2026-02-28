@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useSettings } from "@/hooks/useSettings";
 
 const slideVariants = {
@@ -33,6 +34,7 @@ export default function OnboardingPage() {
   const [name, setName] = useState("");
   const [currentWeight, setCurrentWeight] = useState("55.0");
   const [goalWeight, setGoalWeight] = useState("50.0");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const goNext = () => {
@@ -53,6 +55,8 @@ export default function OnboardingPage() {
         errs.goalWeight = "30〜200 kg の範囲で入力してください";
       else if (g >= c)
         errs.goalWeight = "目標体重は現在の体重より少なくしてください";
+      if (!agreedToTerms)
+        errs.terms = "利用規約とプライバシーポリシーに同意してください";
     }
 
     if (Object.keys(errs).length > 0) {
@@ -225,6 +229,30 @@ export default function OnboardingPage() {
               </span>{" "}
               💕
             </p>
+          </div>
+          <div className="space-y-2">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => {
+                  setAgreedToTerms(e.target.checked);
+                  setErrors({});
+                }}
+                className="mt-0.5 w-5 h-5 accent-pink-400 rounded flex-shrink-0"
+              />
+              <span className="text-xs text-gray-500 leading-relaxed">
+                <Link href="/terms" className="text-purple-400 underline font-medium">利用規約</Link>
+                {" "}と{" "}
+                <Link href="/privacy" className="text-purple-400 underline font-medium">プライバシーポリシー</Link>
+                {" "}に同意します
+              </span>
+            </label>
+            {errors.terms && (
+              <p className="text-xs text-red-400 text-center">
+                {errors.terms}
+              </p>
+            )}
           </div>
         </div>
       ),

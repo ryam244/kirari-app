@@ -4,6 +4,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "キラリ ✨ - 体重ログ × AI日記",
   description: "かわいいUIで毎日の健康習慣を楽しく記録。AIが優しく励ます体重管理アプリ。",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -24,6 +28,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"

@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
+import PetAvatar from "@/components/PetAvatar";
 import { MOODS, WeightLog } from "@/lib/data";
 import { useWeightLogs, todayStr } from "@/hooks/useWeightLogs";
 import { useSettings } from "@/hooks/useSettings";
+import { usePet } from "@/hooks/usePet";
 import { generateAIComment } from "@/lib/aiComments";
+
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -20,8 +23,9 @@ const fadeUp = {
 
 export default function LogPage() {
   const router = useRouter();
-  const { logs, todayLog, addLog, isLoaded } = useWeightLogs();
+  const { logs, todayLog, streak, addLog, isLoaded } = useWeightLogs();
   const { settings } = useSettings();
+  const { pet, feed, refresh: refreshPet } = usePet();
 
   const [weight, setWeight] = useState("52.0");
   const [selectedMood, setSelectedMood] = useState("good");
@@ -30,10 +34,16 @@ export default function LogPage() {
   const [aiComment, setAiComment] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [weightError, setWeightError] = useState("");
-  // Capture before submission to correctly show "記録完了" vs "更新完了"
-  const wasUpdateRef = useRef(false);
+  const [petReward, setPetReward] = useState<{
+    xpGained: number;
+    leveledUp: boolean;
+    evolved: boolean;
+  } | null>(null);
+  const [wasUpdate, setWasUpdate] = useState(false);
 
-  // Pre-fill weight from last log or settings
+  // Sync form state from loaded data — intentionally setting state in effect
+  // to initialize form fields from localStorage data on mount / when todayLog changes
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isLoaded) {
       const last =
@@ -45,6 +55,7 @@ export default function LogPage() {
       }
     }
   }, [isLoaded, todayLog, logs, settings.startWeight]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleWeightChange = (delta: number) => {
     const current = parseFloat(weight) || 50;
@@ -73,20 +84,34 @@ export default function LogPage() {
 
   const handleSubmit = async () => {
     if (!validate()) return;
-    wasUpdateRef.current = !!todayLog;
+    const isUpdate = !!todayLog;
+    setWasUpdate(isUpdate);
     setIsLoading(true);
 
-    // Small artificial delay for UX (feels like AI is thinking)
     await new Promise((r) => setTimeout(r, 800));
 
-    const comment = generateAIComment(selectedMood);
+    const w = parseFloat(parseFloat(weight).toFixed(1));
+    const prevWeight = logs[0]?.weight ?? null;
+
+    // Context-aware AI comment
+    const comment = generateAIComment(selectedMood, {
+      mood: selectedMood,
+      weight: w,
+      memo,
+      prevWeight,
+      streak: streak + (todayLog ? 0 : 1),
+      totalLogs: logs.length + (todayLog ? 0 : 1),
+      goalWeight: settings.goalWeight,
+      startWeight: settings.startWeight,
+      name: settings.name,
+    });
     setAiComment(comment);
 
     const mood = MOODS.find((m) => m.key === selectedMood);
     const newLog: WeightLog = {
       id: todayLog?.id ?? Date.now().toString(),
       date: todayStr(),
-      weight: parseFloat(parseFloat(weight).toFixed(1)),
+      weight: w,
       mood: selectedMood,
       moodEmoji: mood?.emoji ?? "😊",
       memo,
@@ -94,23 +119,28 @@ export default function LogPage() {
     };
 
     addLog(newLog);
+
+    // Feed the pet
+    if (!isUpdate) {
+      const reward = feed(todayStr(), streak + 1);
+      setPetReward(reward);
+    }
+
     setIsLoading(false);
     setSubmitted(true);
   };
 
-  // Dynamic date
   const now = new Date();
   const dayNames = ["日", "月", "火", "水", "木", "金", "土"];
   const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ${dayNames[now.getDay()]}曜日`;
 
   const currentMood = MOODS.find((m) => m.key === selectedMood);
 
-  // Don't show stale "52.0" — wait for localStorage to load
   if (!isLoaded) {
     return (
-      <div className="mobile-container pb-28">
+      <div className="mobile-container">
         <div className="px-5 page-top pb-4">
-          <h1 className="text-2xl font-bold text-gray-700">📝 今日の記録</h1>
+          <h1 className="text-2xl font-bold text-gray-700">今日の記録</h1>
           <p className="text-sm text-gray-400 mt-1">{dateStr}</p>
         </div>
         <div className="flex items-center justify-center h-64">
@@ -122,6 +152,7 @@ export default function LogPage() {
             ✨
           </motion.div>
         </div>
+        <div className="nav-spacer" />
         <BottomNav />
       </div>
     );
@@ -129,7 +160,7 @@ export default function LogPage() {
 
   if (submitted && aiComment) {
     return (
-      <div className="mobile-container pb-28">
+      <div className="mobile-container">
         <div className="px-5 page-top pb-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -141,18 +172,53 @@ export default function LogPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="text-7xl mb-4"
+              className="mb-4 flex justify-center"
             >
-              🌸
+              {pet ? (
+                <PetAvatar stage={pet.stage} happiness={pet.happiness} size="md" />
+              ) : (
+                <span className="text-7xl">🌸</span>
+              )}
             </motion.div>
             <h2 className="text-2xl font-bold text-gray-700 mb-1">
-              {wasUpdateRef.current ? "更新完了！" : "記録完了！"}
+              {wasUpdate ? "更新完了！" : "記録完了！"}
             </h2>
-            <p className="text-gray-400 text-sm">今日も頑張りました✨</p>
+            <p className="text-gray-400 text-sm">今日も頑張りました</p>
           </motion.div>
         </div>
 
         <div className="px-5 space-y-4">
+          {/* Pet reward */}
+          {petReward && petReward.xpGained > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="glass-card p-4 shadow-lg text-center"
+              style={{
+                background: "linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,181,200,0.15))",
+              }}
+            >
+              <p className="text-sm font-semibold text-gray-700">
+                {pet?.name}に ごはんをあげた！
+              </p>
+              <p className="text-xs text-purple-400 mt-1">
+                +{petReward.xpGained} EXP
+                {petReward.leveledUp && " ・ レベルアップ！"}
+              </p>
+              {petReward.evolved && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-sm font-bold text-pink-400 mt-2"
+                >
+                  ✨ {pet?.name}が進化しました！ ✨
+                </motion.p>
+              )}
+            </motion.div>
+          )}
+
           {/* Summary card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -175,7 +241,7 @@ export default function LogPage() {
             </div>
             {memo && (
               <p className="mt-3 text-sm text-gray-500 bg-pink-50 rounded-xl px-3 py-2">
-                💭 {memo}
+                {memo}
               </p>
             )}
           </motion.div>
@@ -197,7 +263,7 @@ export default function LogPage() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-purple-400 mb-2">
-                  キラリからのメッセージ💕
+                  キラリからのメッセージ
                 </p>
                 <p className="text-sm text-gray-600 leading-relaxed">
                   {aiComment}
@@ -216,24 +282,27 @@ export default function LogPage() {
               onClick={() => {
                 setSubmitted(false);
                 setAiComment(null);
+                setPetReward(null);
+                refreshPet();
               }}
               className="btn-secondary py-3"
             >
               修正する
             </button>
             <button onClick={() => router.push("/")} className="btn-primary py-3">
-              ホームへ 🏠
+              ホームへ
             </button>
           </motion.div>
         </div>
 
+        <div className="nav-spacer" />
         <BottomNav />
       </div>
     );
   }
 
   return (
-    <div className="mobile-container pb-28">
+    <div className="mobile-container">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -241,7 +310,7 @@ export default function LogPage() {
         className="px-5 page-top pb-4"
       >
         <h1 className="text-2xl font-bold text-gray-700">
-          {todayLog ? "✏️ 記録を更新" : "📝 今日の記録"}
+          {todayLog ? "記録を更新" : "今日の記録"}
         </h1>
         <p className="text-sm text-gray-400 mt-1">{dateStr}</p>
       </motion.div>
@@ -256,7 +325,7 @@ export default function LogPage() {
           className="glass-card p-6 shadow-lg"
         >
           <h3 className="text-sm font-semibold text-gray-500 mb-4">
-            ⚖️ 今日の体重
+            今日の体重
           </h3>
           <div className="flex items-center justify-center gap-4">
             <button
@@ -300,7 +369,7 @@ export default function LogPage() {
           className="glass-card p-5 shadow-lg"
         >
           <h3 className="text-sm font-semibold text-gray-500 mb-4">
-            💭 今日の気分は？
+            今日の気分は？
           </h3>
           <div className="grid grid-cols-5 gap-2">
             {MOODS.map((mood) => (
@@ -337,12 +406,12 @@ export default function LogPage() {
           className="glass-card p-5 shadow-lg"
         >
           <h3 className="text-sm font-semibold text-gray-500 mb-3">
-            💌 今日のひとこと（任意）
+            今日のひとこと（任意）
           </h3>
           <textarea
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
-            placeholder="例：今日はジムに行けた！野菜を意識した食事ができた✨"
+            placeholder="例：今日はジムに行けた！野菜を意識した食事ができた"
             className="cute-input resize-none text-sm font-normal"
             rows={3}
             style={{ fontFamily: "'Noto Sans JP', sans-serif", fontSize: "14px" }}
@@ -417,24 +486,28 @@ export default function LogPage() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  記録してコメントをもらう 🌸
+                  {todayLog ? "更新する" : "記録してコメントをもらう"}
                 </motion.span>
               )}
             </AnimatePresence>
           </button>
         </motion.div>
 
-        <motion.p
-          custom={5}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="text-center text-xs text-gray-400 pb-2"
-        >
-          💡 記録するとキラリが優しくコメントしてくれます
-        </motion.p>
+        {/* Hint */}
+        {!todayLog && pet && (
+          <motion.p
+            custom={5}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="text-center text-xs text-gray-400 pb-2"
+          >
+            記録すると{pet.name}にごはんをあげられます
+          </motion.p>
+        )}
       </div>
 
+      <div className="nav-spacer" />
       <BottomNav />
     </div>
   );

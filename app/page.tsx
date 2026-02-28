@@ -5,9 +5,13 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
+import PetAvatar from "@/components/PetAvatar";
 import { useWeightLogs } from "@/hooks/useWeightLogs";
 import { useSettings } from "@/hooks/useSettings";
+import { usePet } from "@/hooks/usePet";
 import { MOODS } from "@/lib/data";
+import { getStageInfo } from "@/lib/pet";
+import { getTodayTip } from "@/lib/achievements";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -30,7 +34,7 @@ function MiniWeightChart({
   if (validPoints.length < 2) {
     return (
       <div className="py-6 text-center text-xs text-gray-400">
-        記録が増えるとグラフが表示されます 📈
+        記録が増えるとグラフが表示されます
       </div>
     );
   }
@@ -108,6 +112,7 @@ export default function HomePage() {
   const { logs, todayLog, weeklyData, streak, monthlyChange, isLoaded } =
     useWeightLogs();
   const { settings, isLoaded: settingsLoaded } = useSettings();
+  const { pet, isLoaded: petLoaded } = usePet();
 
   useEffect(() => {
     if (settingsLoaded && !settings.isOnboarded) {
@@ -120,7 +125,9 @@ export default function HomePage() {
   const dayNames = ["日", "月", "火", "水", "木", "金", "土"];
   const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ${dayNames[now.getDay()]}曜日`;
 
-  if (!isLoaded || !settingsLoaded) {
+  const todayTip = getTodayTip();
+
+  if (!isLoaded || !settingsLoaded || !petLoaded) {
     return (
       <div className="mobile-container flex items-center justify-center h-screen">
         <motion.div
@@ -137,21 +144,23 @@ export default function HomePage() {
   // Empty state
   if (logs.length === 0) {
     return (
-      <div className="mobile-container pb-28">
+      <div className="mobile-container">
         <div className="px-5 page-top pb-4">
           <p className="text-sm text-gray-400 font-medium">{dateStr}</p>
           <h1 className="text-2xl font-bold text-gray-700 mt-1">
-            おかえり、{settings.name}！<span className="ml-1">🌸</span>
+            おかえり、{settings.name}！
           </h1>
         </div>
-        <div className="px-5 mt-8 text-center space-y-6">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-7xl"
-          >
-            📝
-          </motion.div>
+        <div className="px-5 mt-4 text-center space-y-6">
+          {pet && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex justify-center"
+            >
+              <PetAvatar stage={pet.stage} happiness={pet.happiness} size="lg" />
+            </motion.div>
+          )}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -163,7 +172,7 @@ export default function HomePage() {
             <p className="text-gray-400 text-sm leading-relaxed">
               毎日体重を記録することで
               <br />
-              キラリがあなたを応援します💕
+              キラリが成長していきます
             </p>
           </motion.div>
           <motion.div
@@ -173,11 +182,12 @@ export default function HomePage() {
           >
             <Link href="/log">
               <button className="w-full btn-primary text-lg">
-                📝 今日の体重を記録する
+                今日の体重を記録する
               </button>
             </Link>
           </motion.div>
         </div>
+        <div className="nav-spacer" />
         <BottomNav />
       </div>
     );
@@ -211,8 +221,10 @@ export default function HomePage() {
         ).toFixed(1)
       : null;
 
+  const petStageInfo = pet ? getStageInfo(pet.stage) : null;
+
   return (
-    <div className="mobile-container pb-28">
+    <div className="mobile-container">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -224,21 +236,67 @@ export default function HomePage() {
           <div>
             <p className="text-sm text-gray-400 font-medium">{dateStr}</p>
             <h1 className="text-2xl font-bold text-gray-700 mt-1">
-              おかえり、{settings.name}！<span className="ml-1">🌸</span>
+              おかえり、{settings.name}！
             </h1>
           </div>
           <Link href="/settings">
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center text-xl shadow-md">
-              🎀
+            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center shadow-md overflow-hidden">
+              {pet ? (
+                <PetAvatar stage={pet.stage} happiness={pet.happiness} size="sm" animate={false} />
+              ) : (
+                <span className="text-xl">🎀</span>
+              )}
             </div>
           </Link>
         </div>
       </motion.div>
 
       <div className="px-5 space-y-4">
+        {/* Pet mini card */}
+        {pet && (
+          <motion.div
+            custom={0}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+          >
+            <Link href="/pet">
+              <div
+                className="glass-card p-4 shadow-lg flex items-center gap-4"
+                style={{
+                  background: "linear-gradient(135deg, rgba(255,181,200,0.15), rgba(200,181,255,0.15))",
+                }}
+              >
+                <PetAvatar stage={pet.stage} happiness={pet.happiness} size="sm" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-gray-700">{pet.name}</span>
+                    <span className="text-xs text-purple-400 font-medium">
+                      Lv.{pet.level} {petStageInfo?.name}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {pet.happiness >= 70
+                      ? "ごきげん！"
+                      : pet.happiness >= 40
+                      ? "ふつう"
+                      : "さみしそう…記録してあげよう"}
+                  </p>
+                  {!todayLog && (
+                    <p className="text-xs text-pink-400 font-medium mt-1">
+                      今日のごはんをあげよう
+                    </p>
+                  )}
+                </div>
+                <span className="text-gray-300 text-sm">→</span>
+              </div>
+            </Link>
+          </motion.div>
+        )}
+
         {/* Today's weight card */}
         <motion.div
-          custom={0}
+          custom={1}
           variants={fadeUp}
           initial="hidden"
           animate="visible"
@@ -273,10 +331,10 @@ export default function HomePage() {
             )}
           </div>
           <p className="text-xs text-gray-400 mt-1">
-            {diffStr !== null ? "昨日比 | " : ""}
+            {diffStr !== null ? "前回比 | " : ""}
             {Number(toGoal) === 0
-              ? "🎉 目標体重達成！おめでとう！"
-              : `目標まで あと ${toGoal} kg ✨`}
+              ? "目標体重達成！おめでとう！"
+              : `目標まで あと ${toGoal} kg`}
           </p>
 
           {/* Progress bar */}
@@ -298,7 +356,7 @@ export default function HomePage() {
 
         {/* AI comment card */}
         <motion.div
-          custom={1}
+          custom={2}
           variants={fadeUp}
           initial="hidden"
           animate="visible"
@@ -326,7 +384,7 @@ export default function HomePage() {
 
         {/* Weekly chart */}
         <motion.div
-          custom={2}
+          custom={3}
           variants={fadeUp}
           initial="hidden"
           animate="visible"
@@ -334,7 +392,7 @@ export default function HomePage() {
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-sm font-semibold text-gray-600">
-              📈 今週の記録
+              今週の記録
             </h3>
             {weekAvg && (
               <span className="text-xs text-gray-400">
@@ -347,21 +405,21 @@ export default function HomePage() {
 
         {/* Quick log button */}
         <motion.div
-          custom={3}
+          custom={4}
           variants={fadeUp}
           initial="hidden"
           animate="visible"
         >
           <Link href="/log">
             <button className="w-full btn-primary text-lg">
-              {todayLog ? "✏️ 今日の記録を更新する" : "📝 今日の体重を記録する"}
+              {todayLog ? "今日の記録を更新する" : "今日の体重を記録する"}
             </button>
           </Link>
         </motion.div>
 
         {/* Stats row */}
         <motion.div
-          custom={4}
+          custom={5}
           variants={fadeUp}
           initial="hidden"
           animate="visible"
@@ -403,16 +461,33 @@ export default function HomePage() {
           ))}
         </motion.div>
 
+        {/* Today's tip */}
+        <motion.div
+          custom={6}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="glass-card p-4 shadow-sm"
+        >
+          <div className="flex gap-3 items-start">
+            <span className="text-2xl">{todayTip.icon}</span>
+            <div>
+              <p className="text-xs font-semibold text-purple-400">今日のTip</p>
+              <p className="text-sm text-gray-500 mt-0.5">{todayTip.tip}</p>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Recent logs preview */}
         <motion.div
-          custom={5}
+          custom={7}
           variants={fadeUp}
           initial="hidden"
           animate="visible"
           className="glass-card p-5 shadow-lg"
         >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-sm font-semibold text-gray-600">💕 最近の記録</h3>
+            <h3 className="text-sm font-semibold text-gray-600">最近の記録</h3>
             <Link href="/diary" className="text-xs text-purple-400 font-medium">
               もっと見る →
             </Link>
@@ -443,6 +518,7 @@ export default function HomePage() {
         </motion.div>
       </div>
 
+      <div className="nav-spacer" />
       <BottomNav />
     </div>
   );

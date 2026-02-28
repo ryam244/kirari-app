@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 import { useSettings } from "@/hooks/useSettings";
 import { clearAllData } from "@/lib/storage";
@@ -81,14 +82,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mobile-container pb-28">
+    <div className="mobile-container pb-0">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="px-5 page-top pb-4"
       >
-        <h1 className="text-2xl font-bold text-gray-700">⚙️ 設定</h1>
+        <h1 className="text-2xl font-bold text-gray-700">設定</h1>
         <p className="text-sm text-gray-400 mt-1">プロフィールと目標を管理</p>
       </motion.div>
 
@@ -304,21 +305,21 @@ export default function SettingsPage() {
             </div>
             <div className="flex justify-between items-center">
               <span>プライバシーポリシー</span>
-              <a
+              <Link
                 href="/privacy"
                 className="text-purple-400 font-medium text-xs px-3 py-1.5 rounded-full border border-purple-200"
               >
                 確認する
-              </a>
+              </Link>
             </div>
             <div className="flex justify-between items-center">
               <span>利用規約</span>
-              <a
+              <Link
                 href="/terms"
                 className="text-purple-400 font-medium text-xs px-3 py-1.5 rounded-full border border-purple-200"
               >
                 確認する
-              </a>
+              </Link>
             </div>
           </div>
         </motion.div>
@@ -372,6 +373,7 @@ export default function SettingsPage() {
         </motion.div>
       </div>
 
+      <div className="nav-spacer" />
       <BottomNav />
     </div>
   );

@@ -19,7 +19,7 @@ export default function PrivacyPage() {
         >
           ← 戻る
         </button>
-        <h1 className="text-2xl font-bold text-gray-700">🔒 プライバシーポリシー</h1>
+        <h1 className="text-2xl font-bold text-gray-700">プライバシーポリシー</h1>
         <p className="text-xs text-gray-400 mt-1">最終更新：2026年2月</p>
       </motion.div>
 
@@ -39,9 +39,11 @@ export default function PrivacyPage() {
             <li>気分の記録</li>
             <li>メモ（任意入力）</li>
             <li>ニックネーム・目標体重などの設定情報</li>
+            <li>AIペットの育成データ（レベル・経験値・進化状態）</li>
+            <li>実績・チャレンジの達成状況</li>
           </ul>
           <p className="font-medium text-pink-500">
-            ✅ これらのデータは外部サーバーに送信されることはありません。
+            これらのデータは外部サーバーに送信されることはありません。
           </p>
         </section>
 
@@ -64,22 +66,37 @@ export default function PrivacyPage() {
         </section>
 
         <section className="glass-card p-5 shadow-sm space-y-3">
-          <h2 className="font-bold text-gray-700 text-base">4. AIコメントについて</h2>
+          <h2 className="font-bold text-gray-700 text-base">4. AIコメント・AIペットについて</h2>
           <p>
-            本アプリのAIコメント機能はアプリ内で完結しており、
+            本アプリのAIコメント機能およびAIペット育成機能はすべてアプリ内で完結しています。
             入力された情報が外部AIサービスに送信されることはありません。
+          </p>
+          <p>
+            AIコメントはお客様の体重推移、気分、メモ、連続記録日数等のコンテキストに基づき、
+            アプリ内のアルゴリズムにより生成されます。
           </p>
         </section>
 
         <section className="glass-card p-5 shadow-sm space-y-3">
-          <h2 className="font-bold text-gray-700 text-base">5. お問い合わせ</h2>
+          <h2 className="font-bold text-gray-700 text-base">5. 健康情報の取り扱い</h2>
           <p>
-            プライバシーに関するご質問は、アプリ内のお問い合わせフォームよりご連絡ください。
+            体重データは健康に関連する個人情報です。本アプリではこのデータを厳重に管理し、
+            デバイス内のみに保存します。クラウドへのバックアップ・同期は行いません。
+          </p>
+        </section>
+
+        <section className="glass-card p-5 shadow-sm space-y-3">
+          <h2 className="font-bold text-gray-700 text-base">6. お問い合わせ</h2>
+          <p>
+            プライバシーに関するご質問は、下記メールアドレスよりご連絡ください。
+          </p>
+          <p className="font-medium text-purple-500">
+            contact@div-me.com
           </p>
         </section>
 
         <p className="text-xs text-gray-400 text-center pb-4">
-          © 2026 キラリ. All rights reserved.
+          &copy; 2026 キラリ. All rights reserved.
         </p>
       </motion.div>
     </div>
