@@ -1,7 +1,6 @@
 // Context-aware AI comment generation (offline / no API key required)
 // Uses weight history, streaks, mood, and memo for personalized comments
 
-import { WeightLog } from "./data";
 
 interface CommentContext {
   mood: string;
