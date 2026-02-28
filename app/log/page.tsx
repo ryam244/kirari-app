@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
@@ -10,7 +10,7 @@ import { useWeightLogs, todayStr } from "@/hooks/useWeightLogs";
 import { useSettings } from "@/hooks/useSettings";
 import { usePet } from "@/hooks/usePet";
 import { generateAIComment } from "@/lib/aiComments";
-import { xpForLevel } from "@/lib/pet";
+
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -39,8 +39,11 @@ export default function LogPage() {
     leveledUp: boolean;
     evolved: boolean;
   } | null>(null);
-  const wasUpdateRef = useRef(false);
+  const [wasUpdate, setWasUpdate] = useState(false);
 
+  // Sync form state from loaded data — intentionally setting state in effect
+  // to initialize form fields from localStorage data on mount / when todayLog changes
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isLoaded) {
       const last =
@@ -52,6 +55,7 @@ export default function LogPage() {
       }
     }
   }, [isLoaded, todayLog, logs, settings.startWeight]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleWeightChange = (delta: number) => {
     const current = parseFloat(weight) || 50;
@@ -80,7 +84,8 @@ export default function LogPage() {
 
   const handleSubmit = async () => {
     if (!validate()) return;
-    wasUpdateRef.current = !!todayLog;
+    const isUpdate = !!todayLog;
+    setWasUpdate(isUpdate);
     setIsLoading(true);
 
     await new Promise((r) => setTimeout(r, 800));
@@ -116,7 +121,7 @@ export default function LogPage() {
     addLog(newLog);
 
     // Feed the pet
-    if (!wasUpdateRef.current) {
+    if (!isUpdate) {
       const reward = feed(todayStr(), streak + 1);
       setPetReward(reward);
     }
@@ -176,7 +181,7 @@ export default function LogPage() {
               )}
             </motion.div>
             <h2 className="text-2xl font-bold text-gray-700 mb-1">
-              {wasUpdateRef.current ? "更新完了！" : "記録完了！"}
+              {wasUpdate ? "更新完了！" : "記録完了！"}
             </h2>
             <p className="text-gray-400 text-sm">今日も頑張りました</p>
           </motion.div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { WeightLog } from "@/lib/data";
 import { getLogs, saveLog, deleteLog } from "@/lib/storage";
 
@@ -10,17 +10,15 @@ export function todayStr(): string {
 }
 
 export function useWeightLogs() {
-  const [logs, setLogs] = useState<WeightLog[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [logs, setLogs] = useState<WeightLog[]>(() => {
+    if (typeof window === "undefined") return [];
+    return getLogs();
+  });
+  const isLoaded = true;
 
   const refresh = useCallback(() => {
     setLogs(getLogs());
-    setIsLoaded(true);
   }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
 
   const addLog = useCallback(
     (log: WeightLog) => {

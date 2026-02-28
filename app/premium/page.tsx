@@ -13,13 +13,6 @@ const fadeUp = {
   }),
 };
 
-const FEATURES_FREE = [
-  "体重ログ（1日1回）",
-  "気分記録",
-  "週間グラフ",
-  "AIひとことコメント（1日1回）",
-];
-
 const FEATURES_LIGHT = [
   "すべての無料機能",
   "体重ログ無制限",

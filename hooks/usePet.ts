@@ -1,19 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { PetState, getPet, savePet, feedPet, decayHappiness } from "@/lib/pet";
 import { todayStr } from "@/hooks/useWeightLogs";
 
 export function usePet() {
-  const [pet, setPet] = useState<PetState | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    const p = getPet();
-    const decayed = decayHappiness(p, todayStr());
-    setPet(decayed);
-    setIsLoaded(true);
-  }, []);
+  const [pet, setPet] = useState<PetState | null>(() => {
+    if (typeof window === "undefined") return null;
+    return decayHappiness(getPet(), todayStr());
+  });
+  const isLoaded = pet !== null;
 
   const feed = useCallback(
     (dateStr: string, streak: number) => {
