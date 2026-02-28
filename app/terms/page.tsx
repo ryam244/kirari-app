@@ -97,7 +97,7 @@ export default function TermsPage() {
             本規約に関するご質問は、下記メールアドレスよりご連絡ください。
           </p>
           <p className="font-medium text-purple-500">
-            support@kirari-app.com
+            contact@div-me.com
           </p>
         </section>
 

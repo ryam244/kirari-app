@@ -4,6 +4,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "キラリ ✨ - 体重ログ × AI日記",
   description: "かわいいUIで毎日の健康習慣を楽しく記録。AIが優しく励ます体重管理アプリ。",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
