@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "com.kirari.app",
-  appName: "キラリ",
+  appId: "com.divme.kirari",
+  appName: "kirariapp",
   webDir: "out",
   plugins: {
     SplashScreen: {
